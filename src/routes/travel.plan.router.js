@@ -7,8 +7,7 @@ router.post('/', async(req, res) => {
     const travelPlanRule = {
         image: 'required|string',
         title: 'required|string',
-        emoji: 'required|string',
-        desc
+        emoji: 'required|string'
     }
     const validation = new Validator(body, travelPlanRule)
     if (validation.passes()) {
