@@ -1,5 +1,5 @@
-const testRouter = require('./test.router')
+const travelPlan = require('./travel.plan.router')
 const mainRouters = (app) => {
-    app.use('/test', testRouter)
+    app.use('/travelPlan', travelPlan)
 }
 module.exports = mainRouters
