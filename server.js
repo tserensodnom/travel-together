@@ -1,7 +1,6 @@
 const express = require('express')
 const mainRouters = require('./src/routes')
 const connectDB = require('./src/databases/config')
-const colors = require('colors')
 const dotenv = require('dotenv')
 const app = express()
 app.use(express.json({ limit: '50mb' }))
