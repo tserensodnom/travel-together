@@ -16,7 +16,10 @@ UserSchema.pre('save', async function () {
   this.password = await bcrypt.hash(this.password, salt)
 })
 UserSchema.methods.getJwt = function () {
-  const token = jwt.sign({ phone: this.phone }, process.env.JWT_TOKEN, { expiresIn: process.env.JWT_EXPIRESIN })
+  const token = jwt.sign({ id: this._id }, process.env.JWT_TOKEN, { expiresIn: process.env.JWT_EXPIRESIN })
   return token
+}
+UserSchema.methods.checkPassword = async function (enteredPassword) {
+  return await bcrypt.compare(enteredPassword, this.password)
 }
 module.exports = mongoose.model('user', UserSchema)
