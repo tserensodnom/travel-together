@@ -15,11 +15,29 @@ async function addTravelPlan (body, user) {
 }
 async function getTravelPlans (size, from) {
   try {
-    const response = await TravelPlan.find({ skip: from, limit: size })
-    console.log(response)
+    const response = await TravelPlan.paginate({}, { skip: from, limit: size })
     return response
   } catch (err) {
     throw new Error(`Алдаа ${err.message}`)
   }
 }
-module.exports = { addTravelPlan, getTravelPlans }
+async function joinPlan (user, travelPlanId) {
+  try {
+    const travelPlan = await TravelPlan.findById(travelPlanId)
+    if (travelPlan) {
+      if (travelPlan.requist_id.indexOf(user._id) >= 0) {
+        throw new Error('Ta тус аялалд өмнө нь хүсэлт явуулсан байна.')
+      } else {
+        travelPlan.requist_id.push(user._id)
+        const updateResponse = await TravelPlan.updateOne({ _id: travelPlanId }, travelPlan)
+        return updateResponse
+      }
+    } else {
+      throw new Error(`Алдаа ${travelPlanId} travel-plan буруу байна.`)
+    }
+    return 'test'
+  } catch (err) {
+    throw new Error(`Алдаа ${err.message}`)
+  }
+}
+module.exports = { addTravelPlan, getTravelPlans, joinPlan }

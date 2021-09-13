@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const mongoosePaginate = require('mongoose-paginate-v2')
 const TravelPlanSchema = new mongoose.Schema({
   image: { type: String },
   emoji: { type: String },
@@ -15,4 +16,5 @@ const TravelPlanSchema = new mongoose.Schema({
   updated_at: { type: Date, default: Date.now },
   created_at: { type: Date, default: Date.now }
 })
+TravelPlanSchema.plugin(mongoosePaginate)
 module.exports = mongoose.model('travel-plan', TravelPlanSchema)
