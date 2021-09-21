@@ -49,8 +49,24 @@ router.get('/joinPlan', isLoggin, async (req, res) => {
     } else {
       return res.send({ status: 'unsuccess', message: response.error })
     }
-  } catch (error) {
-    return res.send({ status: 'error', message: error.message })
+  } catch (err) {
+    return res.send({ status: 'error', message: err.message })
+  }
+})
+router.get('/acceptAndDeclineUser', isLoggin, async (req, res) => {
+  try {
+    let travelPlanId = ''
+    if (req.query !== null && (Object.prototype.hasOwnProperty.call(req.query, 'travel_plan_id'))) {
+      travelPlanId = req.query.travel_plan_id
+    }
+    const response = await joinPlan(req.user, travelPlanId)
+    if (response.acknowledged === true) {
+      return res.send({ status: 'success', message: 'Хүсэлт амжилттай илгээгдлээ' })
+    } else {
+      return res.send({ status: 'unsuccess', message: response.error })
+    }
+  } catch (err) {
+    return res.send({ status: 'error', message: err.message })
   }
 })
 module.exports = router

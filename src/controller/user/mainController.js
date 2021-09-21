@@ -34,7 +34,7 @@ async function login (body) {
     if (user !== null) {
       const result = await user.checkPassword(body.password)
       if (!result) { throw new Error('Хэрэглэгчийн нэр эсвэл нууц үг буруу байна.') }
-      return { user: user, userKey: user.getJwt() }
+      return { user: user, apiKey: user.getJwt() }
     } else {
       throw new Error(`${body.name} нэртэй хэрэглэгч бүртгэлгүй байна.`)
     }

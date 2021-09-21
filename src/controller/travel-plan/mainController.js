@@ -35,7 +35,6 @@ async function joinPlan (user, travelPlanId) {
     } else {
       throw new Error(`Алдаа ${travelPlanId} travel-plan буруу байна.`)
     }
-    return 'test'
   } catch (err) {
     throw new Error(`Алдаа ${err.message}`)
   }
