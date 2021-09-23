@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const Validator = require('validatorjs')
-const { addUser, login } = require('../controller/user/mainController')
+const { addUser, login, forgetPassword } = require('../controller/user/mainController')
 router.post('/onSignup', async (req, res) => {
   try {
     const body = (req.body)
@@ -39,6 +39,27 @@ router.post('/onLogin', async (req, res) => {
     }
   } catch (error) {
     return res.send({ status: 'error', message: error.message })
+  }
+})
+router.post('/forgetPassword', async (req, res) => {
+  try {
+    const body = (req.body)
+    const userRule = {
+      name: 'email|string'
+    }
+    const validation = new Validator(body, userRule)
+    if (validation.passes()) {
+      const response = await forgetPassword(body)
+      if(response.status === 'success'){
+        return res.send({ status: 'success', message: 'Амжилттай нэвтэрлээ'})
+      }else {
+        return res.send({ status: 'success', message: response.error})
+      }
+    } else {
+      return res.send({ status: 'error', message: validation.errors.errors })
+    }
+  } catch (err) {
+    return res.send({ status: 'error', message: err.message })
   }
 })
 module.exports = router

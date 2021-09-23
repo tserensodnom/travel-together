@@ -21,6 +21,7 @@
     "lodash": "^4.17.21",
     "mongoose": "^6.0.4",
     "mongoose-paginate-v2": "^1.4.2",
+    "nodemailer": "^6.6.3",
     "validatorjs": "^3.22.1"
   },
   "devDependencies": {

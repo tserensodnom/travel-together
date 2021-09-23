@@ -1,5 +1,7 @@
 const User = require('../../databases/user')
 const jwt = require('jsonwebtoken')
+const { sendMailToUserMail } = require('../../helper/mail')
+function getResetCode () { return 1000 + Math.floor(Math.random() * 8999) }
 async function isLoggin (req, res, next) {
   try {
     if (!req.headers.authorization) {
@@ -42,4 +44,20 @@ async function login (body) {
     throw new Error(`Алдаа ${err.message}`)
   }
 }
-module.exports = { addUser, login, isLoggin }
+async function forgetPassword (body) {
+  try {
+    const user = await User.findOne({ email: body.email })
+    if (user !== null) {
+      const resetCode = getResetCode()
+      console.log('test',user)
+      const confirmCode = await sendMailToUserMail(user.email, resetCode)
+      if (!confirmCode) { throw new Error('Aмжилтгүй боллоо.') }
+      return { status: 'success' }
+    } else {
+      throw new Error(`${body.email} -тэй хэрэглэгч бүртгэлгүй байна.`)
+    }
+  } catch (err) {
+    throw new Error(`Алдаа ${err.message}`)
+  }
+}
+module.exports = { addUser, login, isLoggin, forgetPassword }
