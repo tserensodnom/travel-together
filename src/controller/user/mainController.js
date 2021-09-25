@@ -1,19 +1,22 @@
 const User = require('../../databases/user')
 const jwt = require('jsonwebtoken')
 const { sendMailToUserMail } = require('../../helper/mail')
+const user = require('../../databases/user')
 function getResetCode () { return 1000 + Math.floor(Math.random() * 8999) }
 async function isLoggin (req, res, next) {
   try {
     if (!req.headers.authorization) {
-      throw new Error('Энэ үйлдлийн хийхийн та эхлээд нэвтэрсэн байх шаарплагатай')
+      res.send({ status: 'unsuccess', message: 'Энэ үйлдлийн хийхийн та эхлээд нэвтэрсэн байх шаарплагатай' })
     }
     const token = req.headers.authorization.split(' ')[1]
-    if (!token) { throw new Error('Тоken байхгүй байна.') }
+    if (!token) {
+      res.send({ status: 'unsuccess', message: 'Тоken байхгүй байна.' })
+    }
     const resultToken = await jwt.verify(token, process.env.JWT_TOKEN)
     req.user = await User.findById(resultToken.id)
     next()
   } catch (err) {
-    throw new Error(`Алдаа ${err.message}`)
+    res.send({ status: 'unsuccess', message: err.message })
   }
 }
 async function addUser (body) {
@@ -66,7 +69,23 @@ async function forgetPassword (body) {
   }
 }
 async function getUser (userId) {
-  const user = await User.findById(userId)
-  if (user) { return user } else { throw new Error(`${userId} id тай хэрэглэгч байхгүй байна.`) }
+  try {
+    const user = await User.findById(userId)
+    if (user) { return user } else { throw new Error(`${userId} id тай хэрэглэгч байхгүй байна.`) }
+  } catch (err) {
+    return err.message
+  }
 }
-module.exports = { addUser, login, isLoggin, forgetPassword, getUser }
+async function setUserProfile (user, body) {
+  try {
+    const userRes = await User.findOne({ _id: user._id })
+    if (!userRes) { throw new Error('Хэрэглэгч олдсонгүй') }
+    userRes.profilePic = body.profilePic
+    console.log('user', userRes, body.profilePic)
+    const response = await User.updateOne({ _id: user._id }, userRes)
+    return response
+  } catch (err) {
+    return err.message
+  }
+}
+module.exports = { addUser, login, isLoggin, forgetPassword, getUser, setUserProfile }

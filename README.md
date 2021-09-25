@@ -42,4 +42,12 @@ travel-together
    7.1 Request http://localhost:3000/travelPlan/fetchMyPlans method => Get required Bearer token
 
 8. GetUser
-   8.1 http://localhost:3000/user/getUser/614e92ef840eed138ff878b8 path.params = userId
+   8.1 Request http://localhost:3000/user/getUser/614e92ef840eed138ff878b8 path.params = userId
+
+9. SetUserProfile
+   9.1 Request http://localhost:3000/user/setUserProfile method => Post required Bearer token
+```json
+   {
+      "profilePic": "test.jpeg"
+   }
+```

@@ -1,7 +1,8 @@
 const express = require('express')
 const router = express.Router()
 const Validator = require('validatorjs')
-const { addUser, login, forgetPassword, getUser } = require('../controller/user/mainController')
+const { isLoggin } = require('../controller/user/mainController')
+const { addUser, login, forgetPassword, getUser, setUserProfile } = require('../controller/user/mainController')
 router.post('/onSignup', async (req, res) => {
   try {
     const body = (req.body)
@@ -70,6 +71,27 @@ router.get('/getUser/:userId', async (req, res) => {
     }
     const response = await getUser(userId)
     res.send({ status: 'success', data: response })
+  } catch (err) {
+    res.send({ status: 'error', message: err.message })
+  }
+})
+router.post('/setUserProfile/', isLoggin, async (req, res) => {
+  try {
+    const body = (req.body)
+    const bodyRule = {
+      profilePic: 'required|string'
+    }
+    const validation = new Validator(body, bodyRule)
+    if (validation.passes()) {
+      const response = await setUserProfile(req.user, body)
+      if (response.acknowledged === true) {
+        return res.send({ status: 'success' })
+      } else {
+        return res.send({ status: 'unsuccess', message: response.error })
+      }
+    } else {
+      return res.send({ status: 'error', message: validation.errors.errors })
+    }
   } catch (err) {
     res.send({ status: 'error', message: err.message })
   }
