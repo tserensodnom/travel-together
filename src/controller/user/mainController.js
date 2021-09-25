@@ -22,7 +22,12 @@ async function addUser (body) {
     if (user === null) {
       const user = await User.create(body)
       const userKey = user.getJwt()
-      return userKey
+      delete user._id
+      delete user.updated_at
+      delete user.password
+      delete user.created_at
+      delete user.__v
+      return { user, userKey }
     } else {
       throw new Error(`${body.phone} дугаартай хэрэглэгч бүртгэлтэй байна.`)
     }
@@ -36,7 +41,7 @@ async function login (body) {
     if (user !== null) {
       const result = await user.checkPassword(body.password)
       if (!result) { throw new Error('Хэрэглэгчийн нэр эсвэл нууц үг буруу байна.') }
-      return { user: user, apiKey: user.getJwt() }
+      return { user: user, userKey: user.getJwt() }
     } else {
       throw new Error(`${body.name} нэртэй хэрэглэгч бүртгэлгүй байна.`)
     }
@@ -49,7 +54,7 @@ async function forgetPassword (body) {
     const user = await User.findOne({ email: body.email })
     if (user !== null) {
       const resetCode = getResetCode()
-      console.log('test',user)
+      console.log('test', user)
       const confirmCode = await sendMailToUserMail(user.email, resetCode)
       if (!confirmCode) { throw new Error('Aмжилтгүй боллоо.') }
       return { status: 'success' }
@@ -60,4 +65,8 @@ async function forgetPassword (body) {
     throw new Error(`Алдаа ${err.message}`)
   }
 }
-module.exports = { addUser, login, isLoggin, forgetPassword }
+async function getUser (userId) {
+  const user = await User.findById(userId)
+  if (user) { return user } else { throw new Error(`${userId} id тай хэрэглэгч байхгүй байна.`) }
+}
+module.exports = { addUser, login, isLoggin, forgetPassword, getUser }

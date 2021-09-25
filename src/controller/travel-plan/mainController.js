@@ -1,4 +1,5 @@
 const TravelPlan = require('../../databases/travel-plan')
+const User = require('../../databases/user')
 async function addTravelPlan (body, user) {
   try {
     const travelPlan = {
@@ -23,7 +24,7 @@ async function getTravelPlans (size, from) {
 }
 async function joinPlan (user, travelPlanId) {
   try {
-    const travelPlan = await TravelPlan.findById(travelPlanId)
+    const travelPlan = await TravelPlan.findOne({ _id: travelPlanId, organizer_id: { $ne: user._id } })
     if (travelPlan) {
       if (travelPlan.requist_id.indexOf(user._id) >= 0) {
         throw new Error('Ta тус аялалд өмнө нь хүсэлт явуулсан байна.')
@@ -39,4 +40,26 @@ async function joinPlan (user, travelPlanId) {
     throw new Error(`Алдаа ${err.message}`)
   }
 }
-module.exports = { addTravelPlan, getTravelPlans, joinPlan }
+async function fetchJoinRequest (user, travelPlanId) {
+  try {
+    let travelPlan = await TravelPlan.findOne({ organizer_id: user._id, _id: travelPlanId })
+    if (travelPlan !== null) {
+      travelPlan = JSON.parse(JSON.stringify(travelPlan))
+      const userRes = await User.find({ _id: { $in: travelPlan.requist_id } })
+      return userRes
+    } else {
+      throw new Error(`${travelPlanId}, id тай travelPlan бүртгэлгүй байна`)
+    }
+  } catch (err) {
+    return err.message
+  }
+}
+async function fetchMyPlans (user) {
+  try {
+    const travelPlans = await TravelPlan.find({ $or: [{ organizer_id: user._id }, { travelers_id: user._id }] })
+    if (travelPlans !== null) { return travelPlans } else { throw new Error('TravelPlan байхгүй байна.') }
+  } catch (err) {
+    return err.message
+  }
+}
+module.exports = { addTravelPlan, getTravelPlans, joinPlan, fetchJoinRequest, fetchMyPlans }

@@ -4,6 +4,7 @@ const TravelPlanSchema = new mongoose.Schema({
   image: { type: String },
   emoji: { type: String },
   status: { type: String },
+  description: { type: String },
   travelers_id: { type: Array },
   requist_id: { type: Array },
   from_location_id: { type: String },

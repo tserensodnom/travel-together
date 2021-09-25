@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const Validator = require('validatorjs')
-const { addUser, login, forgetPassword } = require('../controller/user/mainController')
+const { addUser, login, forgetPassword, getUser } = require('../controller/user/mainController')
 router.post('/onSignup', async (req, res) => {
   try {
     const body = (req.body)
@@ -14,7 +14,7 @@ router.post('/onSignup', async (req, res) => {
     const validation = new Validator(body, userRule)
     if (validation.passes()) {
       const response = await addUser(body)
-      return res.send({ status: 'success', message: 'Амжилттай нэмэгдлээ', data: response })
+      return res.send({ status: 'success', userKey: response.userKey, data: { user: response.user } })
     } else {
       return res.send({ status: 'error', message: validation.errors.errors })
     }
@@ -33,7 +33,7 @@ router.post('/onLogin', async (req, res) => {
     const validation = new Validator(body, userRule)
     if (validation.passes()) {
       const response = await login(body)
-      return res.send({ status: 'success', message: 'Амжилттай нэвтэрлээ', data: response })
+      return res.send({ status: 'success', userKey: response.userKey, data: { user: response.user } })
     } else {
       return res.send({ status: 'error', message: validation.errors.errors })
     }
@@ -50,16 +50,28 @@ router.post('/forgetPassword', async (req, res) => {
     const validation = new Validator(body, userRule)
     if (validation.passes()) {
       const response = await forgetPassword(body)
-      if(response.status === 'success'){
-        return res.send({ status: 'success', message: 'Амжилттай нэвтэрлээ'})
-      }else {
-        return res.send({ status: 'success', message: response.error})
+      if (response.status === 'success') {
+        return res.send({ status: 'success', message: 'Амжилттай нэвтэрлээ' })
+      } else {
+        return res.send({ status: 'success', message: response.error })
       }
     } else {
       return res.send({ status: 'error', message: validation.errors.errors })
     }
   } catch (err) {
     return res.send({ status: 'error', message: err.message })
+  }
+})
+router.get('/getUser/:userId', async (req, res) => {
+  try {
+    let userId
+    if (req.params !== null && (Object.prototype.hasOwnProperty.call(req.params, 'userId'))) {
+      userId = req.params.userId
+    }
+    const response = await getUser(userId)
+    res.send({ status: 'success', data: response })
+  } catch (err) {
+    res.send({ status: 'error', message: err.message })
   }
 })
 module.exports = router
