@@ -1,5 +1,5 @@
 const nodemailer = require('nodemailer')
-const user = require('../databases/user')
+// const user = require('../databases/user')
 async function sendMailToUserMail (userMail, resetCode) {
   try {
     const transporter = nodemailer.createTransport({

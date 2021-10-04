@@ -1,5 +1,6 @@
 const TravelPlan = require('../../databases/travel-plan')
 const User = require('../../databases/user')
+const lodash = require('lodash')
 async function addTravelPlan (body, user) {
   try {
     const travelPlan = {
@@ -62,4 +63,70 @@ async function fetchMyPlans (user) {
     return err.message
   }
 }
-module.exports = { addTravelPlan, getTravelPlans, joinPlan, fetchJoinRequest, fetchMyPlans }
+async function createTodoList (body, user) {
+  try {
+    const travelPlan = await TravelPlan.findOne({
+      _id: body.travel_plan_id,
+      $or: [{ organizer_id: user._id }, { travelers_id: user._id }]
+    })
+    if (travelPlan) {
+      const newTodoList = { text: body.text, isDone: false }
+      travelPlan.todo_list.push(newTodoList)
+      await TravelPlan.updateOne({ _id: body.travel_plan_id }, travelPlan)
+      return { status: 'success' }
+    } else {
+      throw new Error('Travel plan Not found')
+    }
+  } catch (err) {
+    return err.message
+  }
+}
+async function deleteTodolist (toDoListId) {
+  try {
+    let travelPlan = await TravelPlan.findOne({
+      todo_list: { $elemMatch: { _id: toDoListId } }
+    })
+    if (travelPlan) {
+      travelPlan = JSON.parse(JSON.stringify(travelPlan))
+      travelPlan.todo_list = await lodash.filter(travelPlan.todo_list, function (toDoList) { return toDoList._id !== toDoListId })
+      const updateResponse = await TravelPlan.updateOne({ _id: travelPlan._id }, travelPlan)
+      if (updateResponse.acknowledged) { return { status: 'success' } } else { throw new Error('Failed operation delete') }
+    } else {
+      throw new Error('Travel plan Not found')
+    }
+  } catch (err) {
+    return err.message
+  }
+}
+async function updateTodolist (toDoListId, body) {
+  try {
+    let travelPlan = await TravelPlan.findOne({
+      todo_list: { $elemMatch: { _id: toDoListId } }
+    })
+    if (travelPlan) {
+      travelPlan = JSON.parse(JSON.stringify(travelPlan))
+      const toDoListIndex = await lodash.findIndex(travelPlan.todo_list, { _id: toDoListId})
+      console.log(toDoListIndex)
+      console.log(travelPlan.todo_list[toDoListIndex])
+      to
+      return 'success'
+      // travelPlan.todo_list = await lodash.filter(travelPlan.todo_list, function (toDoList) { return toDoList._id !== toDoListId })
+      // const updateResponse = await TravelPlan.updateOne({ _id: travelPlan._id }, travelPlan)
+      // if (updateResponse.acknowledged) { return { status: 'success' } } else { throw new Error('Failed operation update') }
+    } else {
+      throw new Error('Travel plan Not found')
+    }
+  } catch (err) {
+    return err.message
+  }
+}
+module.exports = {
+  addTravelPlan,
+  getTravelPlans,
+  joinPlan,
+  fetchJoinRequest,
+  fetchMyPlans,
+  createTodoList,
+  deleteTodolist,
+  updateTodolist
+}

@@ -11,8 +11,8 @@ const TravelPlanSchema = new mongoose.Schema({
   destination_location_id: { type: String },
   organizer_id: { type: mongoose.Schema.Types.ObjectId },
   budget_id: { type: String },
-  todo_list: { type: Array },
-  started_at: { type: Date.now },
+  todo_list: [{ id: { type: String }, text: { type: String }, isDone: { type: Boolean } }],
+  started_at: { type: Date, default: Date.now },
   duration_time: { type: Number },
   updated_at: { type: Date, default: Date.now },
   created_at: { type: Date, default: Date.now }

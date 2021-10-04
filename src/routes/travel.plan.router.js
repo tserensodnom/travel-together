@@ -3,6 +3,7 @@ const router = express.Router()
 const Validator = require('validatorjs')
 const { isLoggin } = require('../controller/user/mainController')
 const { addTravelPlan, getTravelPlans, joinPlan, fetchJoinRequest, fetchMyPlans } = require('../controller/travel-plan/mainController')
+const { createTodoList, deleteTodolist, updateTodolist } = require('../controller/travel-plan/mainController')
 router.post('/createPlan', isLoggin, async (req, res) => {
   try {
     const body = (req.body)
@@ -71,6 +72,61 @@ router.get('/fetchMyPlans/', isLoggin, async (req, res) => {
     return res.send({ status: 'success', data: response })
   } catch (err) {
     return res.send({ status: 'error', message: err.message })
+  }
+})
+router.post('/createTodoList', isLoggin, async (req, res) => {
+  try {
+    const body = (req.body)
+    const toDoListRule = {
+      text: 'required|string',
+      travel_plan_id: 'required|string'
+    }
+    const validation = new Validator(body, toDoListRule)
+    if (validation.passes()) {
+      const response = await createTodoList(body, req.user)
+      if (response.status === 'success') {
+        return res.send({ status: 'success' })
+      } else {
+        return res.send({ status: 'error', message: response })
+      }
+    } else {
+      return res.send({ status: 'error', message: validation.errors.errors })
+    }
+  } catch (err) {
+    return res.send({ status: 'error', message: err.message })
+  }
+})
+router.delete('/deleteTodolist/:toDoListId', isLoggin, async (req, res) => {
+  try {
+    let toDoListId = ''
+    if (req.params !== null && (Object.prototype.hasOwnProperty.call(req.params, 'toDoListId'))) {
+      toDoListId = req.params.toDoListId ? req.params.toDoListId : ''
+    }
+    const response = await deleteTodolist(toDoListId)
+    if (response.status === 'success') {
+      return res.send({ status: 'success' })
+    } else {
+      return res.send({ status: 'error', message: response })
+    }
+  } catch (err) {
+    res.send({ status: 'error', message: err.message })
+  }
+})
+router.put('/updataTodolist/:toDoListId', isLoggin, async (req, res) => {
+  try {
+    let toDoListId = ''
+    if (req.params !== null && (Object.prototype.hasOwnProperty.call(req.params, 'toDoListId'))) {
+      toDoListId = req.params.toDoListId ? req.params.toDoListId : ''
+    }
+    const body = (req.body)
+    const response = await updateTodolist(toDoListId, body)
+    if (response.status === 'success') {
+      return res.send({ status: 'success' })
+    } else {
+      return res.send({ status: 'error', message: response })
+    }
+  } catch (err) {
+    res.send({ status: 'error', message: err.message })
   }
 })
 module.exports = router

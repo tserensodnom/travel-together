@@ -1,7 +1,6 @@
 const User = require('../../databases/user')
 const jwt = require('jsonwebtoken')
 const { sendMailToUserMail } = require('../../helper/mail')
-const user = require('../../databases/user')
 function getResetCode () { return 1000 + Math.floor(Math.random() * 8999) }
 async function isLoggin (req, res, next) {
   try {
