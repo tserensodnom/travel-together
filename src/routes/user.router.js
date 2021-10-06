@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const Validator = require('validatorjs')
 const { isLoggin } = require('../controller/user/mainController')
-const { addUser, login, forgetPassword, getUser, setUserProfile } = require('../controller/user/mainController')
+const { addUser, login, forgetPassword, getUser, setUserProfile, verifyResetcode, newPassword } = require('../controller/user/mainController')
 router.post('/onSignup', async (req, res) => {
   try {
     const body = (req.body)
@@ -46,13 +46,13 @@ router.post('/forgetPassword', async (req, res) => {
   try {
     const body = (req.body)
     const userRule = {
-      name: 'email|string'
+      email: 'required|string'
     }
     const validation = new Validator(body, userRule)
     if (validation.passes()) {
       const response = await forgetPassword(body)
       if (response.status === 'success') {
-        return res.send({ status: 'success', message: 'Амжилттай нэвтэрлээ' })
+        return res.send({ status: 'success' })
       } else {
         return res.send({ status: 'success', message: response.error })
       }
@@ -63,6 +63,52 @@ router.post('/forgetPassword', async (req, res) => {
     return res.send({ status: 'error', message: err.message })
   }
 })
+router.post('/verifyResetcode', async (req, res) => {
+  try {
+    const body = (req.body)
+    const userRule = {
+      email: 'required|string',
+      reset_code: 'required|integer'
+    }
+    const validation = new Validator(body, userRule)
+    if (validation.passes()) {
+      const response = await verifyResetcode(body)
+      if (response.status === 'success') {
+        return res.send({ status: 'success' })
+      } else {
+        return res.send({ status: 'success', message: response.error })
+      }
+    } else {
+      return res.send({ status: 'error', message: validation.errors.errors })
+    }
+  } catch (err) {
+    return res.send({ status: 'error', message: err.message })
+  }
+})
+router.post('/newPassword', async (req, res) => {
+  try {
+    const body = (req.body)
+    const userRule = {
+      email: 'required|string',
+      new_password: 'required|string',
+      confirm_password: 'required|string'
+    }
+    const validation = new Validator(body, userRule)
+    if (validation.passes()) {
+      const response = await newPassword(body)
+      if (response.status === 'success') {
+        return res.send({ status: 'success' })
+      } else {
+        return res.send({ status: 'success', message: response.error })
+      }
+    } else {
+      return res.send({ status: 'error', message: validation.errors.errors })
+    }
+  } catch (err) {
+    return res.send({ status: 'error', message: err.message })
+  }
+})
+
 router.get('/getUser/:userId', async (req, res) => {
   try {
     let userId

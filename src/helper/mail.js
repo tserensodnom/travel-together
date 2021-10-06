@@ -9,14 +9,14 @@ async function sendMailToUserMail (userMail, resetCode) {
       secure: false,
       auth: {
         user: 'ttogether803@gmail.com',
-        pass: 'mongol123'
+        pass: 'cofmbexzbrjtytit'
       }
     })
     const response = await transporter.sendMail({
       from: 'ttogether803@gmail.com',
-      to: 'hagoc40041@soulsuns.com',
+      to: userMail,
       subject: 'Change Password',
-      text: 'resetCode'
+      text: `Reset Code: ${resetCode}`
     })
     return response
   } catch (err) {

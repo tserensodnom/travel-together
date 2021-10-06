@@ -105,14 +105,11 @@ async function updateTodolist (toDoListId, body) {
     })
     if (travelPlan) {
       travelPlan = JSON.parse(JSON.stringify(travelPlan))
-      const toDoListIndex = await lodash.findIndex(travelPlan.todo_list, { _id: toDoListId})
-      console.log(toDoListIndex)
-      console.log(travelPlan.todo_list[toDoListIndex])
-      to
-      return 'success'
-      // travelPlan.todo_list = await lodash.filter(travelPlan.todo_list, function (toDoList) { return toDoList._id !== toDoListId })
-      // const updateResponse = await TravelPlan.updateOne({ _id: travelPlan._id }, travelPlan)
-      // if (updateResponse.acknowledged) { return { status: 'success' } } else { throw new Error('Failed operation update') }
+      const toDoListIndex = await lodash.findIndex(travelPlan.todo_list, { _id: toDoListId })
+      travelPlan.todo_list[toDoListIndex].text = body.text ? body.text : travelPlan.todo_list[toDoListIndex].text
+      travelPlan.todo_list[toDoListIndex].isDone = Object.prototype.hasOwnProperty.call(body, 'isDone') ? body.isDone : travelPlan.todo_list[toDoListIndex].isDone
+      const updateResponse = await TravelPlan.updateOne({ _id: travelPlan._id }, travelPlan)
+      if (updateResponse.acknowledged) { return { status: 'success' } } else { throw new Error('Failed operation update') }
     } else {
       throw new Error('Travel plan Not found')
     }

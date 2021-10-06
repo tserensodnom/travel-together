@@ -1,5 +1,6 @@
 const User = require('../../databases/user')
 const jwt = require('jsonwebtoken')
+const bcrypt = require('bcrypt')
 const { sendMailToUserMail } = require('../../helper/mail')
 function getResetCode () { return 1000 + Math.floor(Math.random() * 8999) }
 async function isLoggin (req, res, next) {
@@ -53,13 +54,54 @@ async function login (body) {
 }
 async function forgetPassword (body) {
   try {
-    const user = await User.findOne({ email: body.email })
+    let user = await User.findOne({ email: body.email })
     if (user !== null) {
       const resetCode = getResetCode()
-      console.log('test', user)
+      user = JSON.parse(JSON.stringify(user))
       const confirmCode = await sendMailToUserMail(user.email, resetCode)
-      if (!confirmCode) { throw new Error('Aмжилтгүй боллоо.') }
+      if (!confirmCode) { throw new Error('unsuccess') }
+      user.reset_code = resetCode
+      await User.updateOne({ _id: user._id }, user)
       return { status: 'success' }
+    } else {
+      throw new Error(`${body.email} -тэй хэрэглэгч бүртгэлгүй байна.`)
+    }
+  } catch (err) {
+    throw new Error(`Алдаа ${err.message}`)
+  }
+}
+async function verifyResetcode (body) {
+  try {
+    let user = await User.findOne({ email: body.email })
+    if (user !== null) {
+      user = JSON.parse(JSON.stringify(user))
+      if (user.reset_code === body.reset_code) {
+        return { status: 'success' }
+      } else {
+        throw new Error('Verification code does not match')
+      }
+    } else {
+      throw new Error(`${body.email} -тэй хэрэглэгч бүртгэлгүй байна.`)
+    }
+  } catch (err) {
+    throw new Error(`Алдаа ${err.message}`)
+  }
+}
+async function newPassword (body) {
+  try {
+    let user = await User.findOne({ email: body.email })
+    if (user !== null) {
+      user = JSON.parse(JSON.stringify(user))
+      if (body.new_password === body.confirm_password) {
+        const salt = await bcrypt.genSalt(10)
+        body.new_password = await bcrypt.hash(body.new_password, salt)
+        user.password = body.new_password ? body.new_password : user.password
+        user.reset_code = null
+        await User.updateOne({ _id: user._id }, user)
+        return 'success'
+      } else {
+        throw new Error('Password does not match')
+      }
     } else {
       throw new Error(`${body.email} -тэй хэрэглэгч бүртгэлгүй байна.`)
     }
@@ -80,11 +122,10 @@ async function setUserProfile (user, body) {
     const userRes = await User.findOne({ _id: user._id })
     if (!userRes) { throw new Error('Хэрэглэгч олдсонгүй') }
     userRes.profilePic = body.profilePic
-    console.log('user', userRes, body.profilePic)
     const response = await User.updateOne({ _id: user._id }, userRes)
     return response
   } catch (err) {
     return err.message
   }
 }
-module.exports = { addUser, login, isLoggin, forgetPassword, getUser, setUserProfile }
+module.exports = { addUser, login, isLoggin, forgetPassword, getUser, setUserProfile, verifyResetcode, newPassword }

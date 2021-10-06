@@ -7,6 +7,7 @@ const UserSchema = new mongoose.Schema({
   phone: { type: Number },
   password: { type: String, select: false },
   profilePic: { type: String },
+  reset_code: { type: Number },
   resetPasswordToken: String,
   updated_at: { type: Date, default: Date.now },
   created_at: { type: Date, default: Date.now }
